@@ -1,0 +1,16 @@
+extends layout
+
+block content
+  h1= title
+  ul
+      for list in lists
+          li
+              .panel.panel-default
+                  .panel-body
+                      h3 #{list.title}
+                      p #{list.content}
+                  .panel-footer
+                      a(class="btn btn-default",href="/modify/#{list._id}") change
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      a(class="btn btn-danger",href="/del/#{list._id}") delete
+  a(class="btn btn-primary",href="/add") add

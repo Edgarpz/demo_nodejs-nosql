@@ -1,0 +1,14 @@
+extends layout
+
+block content
+    form(method="post",action="/modify")
+        .form-group
+            input(name="id",type="hidden",value="#{id}")
+        .form-group
+            span title:
+            input(class="form-control",name="title",value="#{title}")
+        .form-group
+            span content:
+            input(class="form-control",name="content",value="#{content}")
+        .form-group
+            button(type="submit",class="btn btn-primary") change

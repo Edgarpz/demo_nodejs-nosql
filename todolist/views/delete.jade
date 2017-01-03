@@ -1,0 +1,10 @@
+extends layout
+
+block content
+    p
+    span delete user id
+        b #{id}
+    span  ==>
+    a(href='../del/ok/#{id}',class='btn btn-default') sure?
+    div
+    a(href='../',class='btn btn-default') back
