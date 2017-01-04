@@ -21,6 +21,7 @@ module.exports = function(app) {
         password_re = req.body['password-repeat'];
     if (password != password_re) {
       console.log('密码不一致');
+      req.flash('error', '密码不一致！');
       return res.redirect('/reg');
     }
    
@@ -68,5 +69,9 @@ module.exports = function(app) {
     res.render('post', { title: '发表'});
   });
   app.post('/post', function(req, res) {
+  });
+  app.get('/flash', function(req, res) {
+    req.flash('info', 'Flash is back!');
+    res.redirect('/');
   });
 }
