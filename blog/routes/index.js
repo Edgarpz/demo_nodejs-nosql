@@ -1,15 +1,36 @@
 var crypto = require('crypto');
+var fs = require('fs');
 var Collection = require('../models/collection');
 var Crud = require('../models/crud');
 var settings = require('../settings');
 var check = require('../middlewares/check');
 var markdown = require('markdown').markdown;
+var multer = require('multer');
+var UPLOADPATH = "./public/images/upload";
 var User;
 var Post;
 var db = new Collection(settings.db, function(db) {
   User = new Crud(db, function(){});
   Post = new Crud(db, function(){});
 });
+
+var storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    cb(null, UPLOADPATH);
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  }
+});
+var upload = multer({storage: storage});
+var createFolder = function(folder){
+  try{
+    fs.accessSync(folder);
+  }catch(e){
+    fs.mkdirSync(folder);
+  }
+};
+createFolder(UPLOADPATH);
 
 module.exports = function(app) {
   app.get('/', function(req, res, next) {
@@ -135,5 +156,19 @@ module.exports = function(app) {
     req.session.user = null;
     req.flash('success', "登出成功！");
     res.redirect('/');
+  });
+  app.get('/upload', check.checkLogin);
+  app.get('/upload', function(req, res) {
+    res.render('upload', {
+      title: "文件上传",
+      user: req.session.user,
+      success: req.flash('success').toString(),
+      error: req.flash('error').toString()
+    });
+  });
+  app.post('/upload', check.checkLogin);
+  app.post('/upload', upload.array('photo', 5), function(req, res, next) {
+    req.flash('success', "文件上传成功！");
+    res.redirect('/upload');
   });
 }
