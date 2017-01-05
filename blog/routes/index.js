@@ -18,7 +18,8 @@ module.exports = function(app) {
   app.post('/reg', function(req, res) {
     var name = req.body.name,
         password = req.body.password,
-        password_re = req.body['password-repeat'];
+        password_re = req.body['password-repeat'],
+        email = req.body.email;
     if (password != password_re) {
       console.log('密码不一致');
       req.flash('error', '密码不一致！');
@@ -28,12 +29,22 @@ module.exports = function(app) {
 
     var md5 = crypto.createHash('md5'),
         password = md5.update(req.body.password).digest('hex');
-    var newUser = new User({
-      name: req.body.name,
-      password: req.body.password,
-      email: req.body.email
-    });
-    
+    var newUser = {
+      name: name,
+      password: password,
+      email: email
+    };
+
+    User.find("users", {name: name}, function(err, user) {
+      if(err) {
+        console.log('error');
+        return res.redirect('/');
+      }
+      if (user) {
+        console.log('用户已经存在');
+        return res.redirect('/reg');
+      }
+    })
     User.insert("users", [newUser], function() {
       console.log("success");
     }); 
