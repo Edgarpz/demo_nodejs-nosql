@@ -35,39 +35,18 @@ module.exports = function(app) {
       email: email
     };
 
-    User.find("users", {name: name}, function(err, user) {
-      if(err) {
-        console.log('error');
-        return res.redirect('/');
-      }
-      if (user) {
+    User.find("users", {name: name}, function(user) {
+      console.log(user);
+      if(user.length != 0) {
         console.log('用户已经存在');
         return res.redirect('/reg');
+      } else {
+        User.insert("users", [newUser], function() {
+          console.log("success");
+          return res.redirect('/');
+        });
       }
-    })
-    User.insert("users", [newUser], function() {
-      console.log("success");
-    }); 
-    
-    // User.get(newUser, function(err, user) {
-    //   if (err) {
-    //     // req.flash('error', err);
-    //     return res.redirect('/');
-    //   }
-    //   if(user) {
-    //     // req.flash('error', '用户已经存在');
-    //     return res.redirect('/reg');
-    //   }
-    //   User.save(newUser, function (err, user) {
-    //     if (err) {
-    //       // req.flash('error', err)
-    //       return res.redirect('/reg');
-    //     }
-    //     req.session.user = newUser;
-    //     // req.flash('success', '注册成功！');
-    //     res.redirect('/');
-    //   });
-    // });
+    });
   });
   
   app.get('/login', function(req, res) {
