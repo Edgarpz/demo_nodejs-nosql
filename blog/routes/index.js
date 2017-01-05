@@ -12,11 +12,14 @@ var db = new Collection(settings.db, function(db) {
 
 module.exports = function(app) {
   app.get('/', function(req, res, next) {
-    res.render('index', { 
-      title: '主页',
-      user: req.session.user,
-      success: req.flash('success').toString(),
-      error: req.flash('error').toString()
+    Post.find("posts", {}, function(posts) {
+      res.render('index', {
+        title: '主页',
+        user: req.session.user,
+        posts: posts,
+        success: req.flash('success').toString(),
+        error: req.flash('error').toString()
+      });
     });
   });
   
@@ -49,14 +52,12 @@ module.exports = function(app) {
     };
 
     User.find("users", {name: name}, function(user) {
-      console.log(user);
       if(user.length != 0) {
         req.flash('error', '用户已经存在！');
         return res.redirect('/reg');
       } else {
         User.insert("users", [newUser], function() {
-          console.log("success");
-          req.session.user = user;
+          req.session.user = user[0];
           req.flash('success', '注册成功！');
           return res.redirect('/');
         });
@@ -86,25 +87,46 @@ module.exports = function(app) {
         req.flash('error', "密码错误！");
         return res.redirect('/login');
       }
-      req.session.user = user;
+      req.session.user = user[0];
       req.flash('success', "登录成功！");
       res.redirect('/');
     });
   });
   
-  app.get('/post', checkLogin);
+  app.get('/post', check.checkLogin);
   app.get('/post', function(req, res) {
-    res.render('post', { 
+    res.render('post', {
       title: '发表',
       user: req.session.user,
       success: req.flash('success').toString(),
       error: req.flash('error').toString()
     });
   });
-  app.post('/post', checkLogin);
+  app.post('/post', check.checkLogin);
   app.post('/post', function(req, res) {
+    var currentUser = req.session.user;
+    console.log('currentUser: ', currentUser);
+    var date = new Date();
+    var time = {
+      date: date,
+      year: date.getFullYear(),
+      month: date.getFullYear() + "-" + (date.getMonth() + 1),
+      day: date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate(),
+      minute: date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate()+ " " +
+      date.getHours() + ":" + (date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes())
+    };
+    var post = {
+      name: currentUser.name,
+      time: time,
+      title: req.body.title,
+      post: req.body.post
+    };
+    Post.insert("posts", [post], function() {
+      req.flash('success', "发布成功！");
+      res.redirect('/');
+    });
   });
-  app.get('/logout', checkLogin);
+  app.get('/logout', check.checkLogin);
   app.get('/logout', function(req, res) {
     req.session.user = null;
     req.flash('success', "登出成功！");
