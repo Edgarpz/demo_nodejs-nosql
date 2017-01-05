@@ -4,8 +4,10 @@ var Crud = require('../models/crud');
 var settings = require('../settings');
 var check = require('../middlewares/check');
 var User;
+var Post;
 var db = new Collection(settings.db, function(db) {
   User = new Crud(db, function(){});
+  Post = new Crud(db, function(){});
 });
 
 module.exports = function(app) {
@@ -90,11 +92,19 @@ module.exports = function(app) {
     });
   });
   
+  app.get('/post', checkLogin);
   app.get('/post', function(req, res) {
-    res.render('post', { title: '发表'});
+    res.render('post', { 
+      title: '发表',
+      user: req.session.user,
+      success: req.flash('success').toString(),
+      error: req.flash('error').toString()
+    });
   });
+  app.post('/post', checkLogin);
   app.post('/post', function(req, res) {
   });
+  app.get('/logout', checkLogin);
   app.get('/logout', function(req, res) {
     req.session.user = null;
     req.flash('success', "登出成功！");
