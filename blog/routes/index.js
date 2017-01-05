@@ -3,6 +3,7 @@ var Collection = require('../models/collection');
 var Crud = require('../models/crud');
 var settings = require('../settings');
 var check = require('../middlewares/check');
+var markdown = require('markdown').markdown;
 var User;
 var Post;
 var db = new Collection(settings.db, function(db) {
@@ -13,6 +14,9 @@ var db = new Collection(settings.db, function(db) {
 module.exports = function(app) {
   app.get('/', function(req, res, next) {
     Post.find("posts", {}, function(posts) {
+      posts.forEach(function(post) {
+        post.post = markdown.toHTML(post.post);
+      });
       res.render('index', {
         title: '主页',
         user: req.session.user,
