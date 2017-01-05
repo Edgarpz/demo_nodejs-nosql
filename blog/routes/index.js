@@ -2,6 +2,7 @@ var crypto = require('crypto');
 var Collection = require('../models/collection');
 var Crud = require('../models/crud');
 var settings = require('../settings');
+var check = require('../middlewares/check');
 var User;
 var db = new Collection(settings.db, function(db) {
   User = new Crud(db, function(){});
@@ -17,6 +18,7 @@ module.exports = function(app) {
     });
   });
   
+  app.get('/reg', check.checkNotLogin);
   app.get('/reg', function(req, res) {
     res.render('reg', { 
       title: '注册',
@@ -25,6 +27,7 @@ module.exports = function(app) {
       error: req.flash('error').toString()
     });
   });
+  app.post('/reg', check.checkNotLogin);
   app.post('/reg', function(req, res) {
     var name = req.body.name,
         password = req.body.password,
@@ -59,6 +62,7 @@ module.exports = function(app) {
     });
   });
   
+  app.get('/login', check.checkNotLogin);
   app.get('/login', function(req, res) {
     res.render('login', {
       title: '登陆',
@@ -67,6 +71,7 @@ module.exports = function(app) {
       error: req.flash('error').toString()
     });
   });
+  app.post('/login', check.checkNotLogin);
   app.post('/login', function(req, res) {
     var md5 = crypto.createHash('md5'),
         password = md5.update(req.body.password).digest('hex');
