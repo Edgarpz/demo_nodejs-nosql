@@ -60,9 +60,29 @@ module.exports = function(app) {
   });
   
   app.get('/login', function(req, res) {
-    res.render('login', { title: '登陆'});
+    res.render('login', {
+      title: '登陆',
+      user: req.session.user,
+      success: req.flash('success').toString(),
+      error: req.flash('error').toString()
+    });
   });
   app.post('/login', function(req, res) {
+    var md5 = crypto.createHash('md5'),
+        password = md5.update(req.body.password).digest('hex');
+    User.find("users", {name: req.body.name}, function(user) {
+      if(user.length == 0){
+        req.flash('error', '用户不存在！');
+        return res.redirect('/login');
+      }
+      if(user[0].password != password) {
+        req.flash('error', "密码错误！");
+        return res.redirect('/login');
+      }
+      req.session.user = user;
+      req.flash('success', "登录成功！");
+      res.redirect('/');
+    });
   });
   
   app.get('/post', function(req, res) {
@@ -70,8 +90,9 @@ module.exports = function(app) {
   });
   app.post('/post', function(req, res) {
   });
-  app.get('/flash', function(req, res) {
-    req.flash('info', 'Flash is back!');
+  app.get('/logout', function(req, res) {
+    req.session.user = null;
+    req.flash('success', "登出成功！");
     res.redirect('/');
   });
 }
